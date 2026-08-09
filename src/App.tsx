@@ -10,6 +10,7 @@ import { ChatMessage, MemoryItem, PlayerProfile, RelationshipStageId, Relationsh
 import { loadGameState, saveGameState, resetGameState } from './utils/storage';
 import { soundEngine } from './utils/audio';
 import { RELATIONSHIP_STAGES } from './data/karimData';
+import { KARIM_ARTWORK } from './components/KarimAvatar';
 
 const KARIM_WORKER_URL = 'https://karim-worker.karim-siraku.workers.dev/chat';
 
@@ -43,8 +44,8 @@ export default function App() {
   }, [messages, memories, relationship, currentEvent, playerProfile, karimArtworkUrl, audioEnabled, autoInitiateEnabled]);
 
   useEffect(() => {
-    const leaveTimer = window.setTimeout(() => setSplashLeaving(true), 1250);
-    const hideTimer = window.setTimeout(() => setShowSplash(false), 1850);
+    const leaveTimer = window.setTimeout(() => setSplashLeaving(true), 1050);
+    const hideTimer = window.setTimeout(() => setShowSplash(false), 1500);
     return () => { window.clearTimeout(leaveTimer); window.clearTimeout(hideTimer); };
   }, []);
 
@@ -54,9 +55,9 @@ export default function App() {
       if (!text) continue;
       setIsTyping(true);
       const chars = text.length;
-      const baseDelay = Math.min(Math.max(950 + chars * 28, 1200), 3600);
-      const randomJitter = Math.floor(Math.random() * 650) - 325;
-      await new Promise((resolve) => setTimeout(resolve, Math.max(baseDelay + randomJitter, 900)));
+      const baseDelay = Math.min(Math.max(420 + chars * 14, 600), 1800);
+      const randomJitter = Math.floor(Math.random() * 260) - 130;
+      await new Promise((resolve) => setTimeout(resolve, Math.max(baseDelay + randomJitter, 450)));
       setIsTyping(false);
       setMessages((prev) => [...prev, {
         id: `msg-karim-${Date.now()}-${i}`,
@@ -65,7 +66,7 @@ export default function App() {
         status: 'read',
       }]);
       soundEngine.playMessageReceive();
-      if (i < msgs.length - 1) await new Promise((resolve) => setTimeout(resolve, 350 + Math.floor(Math.random() * 650)));
+      if (i < msgs.length - 1) await new Promise((resolve) => setTimeout(resolve, 180 + Math.floor(Math.random() * 280)));
     }
     setIsTyping(false);
   };
@@ -168,12 +169,12 @@ export default function App() {
           <div className="absolute inset-3 rounded-[27px] border-2 border-[#ead7b6]" />
           <div className="relative z-10 flex flex-col items-center gap-5 px-8 text-center">
             <div className="rounded-full border-4 border-[#dfc79f] bg-[#fffaf0] p-2 shadow-[0_5px_0_rgba(101,76,51,.12)]">
-              <img src="/assets/.aistudio/Karim.jpg" alt="Karim" className="h-32 w-32 rounded-full object-cover sm:h-36 sm:w-36" />
+              <img src={KARIM_ARTWORK} alt="Karim" className="h-32 w-32 rounded-full object-cover sm:h-36 sm:w-36" />
             </div>
             <div>
               <p className="mb-1 text-[12px] font-extrabold uppercase tracking-[.3em] text-[#a1846c]">a message from</p>
               <h1 className="text-5xl font-black tracking-tight text-[#4b3b42]">KARIM</h1>
-              <p className="mt-2 text-sm font-bold text-[#9a806c]">SMA Garuda · online</p>
+              <p className="mt-2 text-sm font-bold text-[#9a806c]">SMKN 2 Cilaku · online</p>
             </div>
           </div>
           <div className="absolute bottom-7 text-[11px] font-bold text-[#b39a82]">tap into the conversation</div>
