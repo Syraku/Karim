@@ -1,15 +1,40 @@
 @import "tailwindcss";
 
-/* Clean messaging chat wallpaper background */
+:root {
+  font-family: 'Trebuchet MS', 'Nunito', system-ui, sans-serif;
+  color: #493f43;
+  background: #f6e7c7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; }
+body { overflow: hidden; background: #f6e7c7; }
+button, input, textarea { font-family: inherit; }
+button { cursor: pointer; }
+button:active { transform: scale(.96); }
+
 .bg-chat-wallpaper {
-  background-color: #f0f2f5;
-  background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
-  background-size: 16px 16px;
+  background-color: #f6e7c7;
+  background-image:
+    radial-gradient(circle at 18px 18px, rgba(125, 91, 58, .12) 1.2px, transparent 1.4px),
+    linear-gradient(rgba(255,255,255,.18) 1px, transparent 1px);
+  background-size: 24px 24px, 100% 30px;
 }
 
-.dark .bg-chat-wallpaper {
-  background-color: #0f172a;
-  background-image: radial-gradient(#334155 0.75px, transparent 0.75px);
-  background-size: 16px 16px;
-}
+.dark .bg-chat-wallpaper { background-color: #302c2d; background-image: radial-gradient(circle at 18px 18px, rgba(255,255,255,.07) 1.2px, transparent 1.4px); }
 
+@keyframes karimSplashIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes karimSplashOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+@keyframes karimPop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.karim-splash { animation: karimSplashIn .55s cubic-bezier(.2,.8,.2,1) both; }
+.karim-splash.is-leaving { animation: karimSplashOut .55s ease forwards; }
+.karim-message-pop { animation: karimPop .24s ease-out both; }
+
+* { scrollbar-width: thin; scrollbar-color: #c9aa78 transparent; }
+*::-webkit-scrollbar { width: 7px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #c9aa78; border-radius: 20px; }
