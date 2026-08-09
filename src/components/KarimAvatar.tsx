@@ -1,5 +1,9 @@
 import React from 'react';
 
+// Canonical Karim artwork committed to the repository.
+// Do not replace this with generated artwork or a generic avatar.
+const KARIM_ARTWORK = new URL('../../assets/.aistudio/Karim.jpg', import.meta.url).href;
+
 interface KarimAvatarProps {
   customArtworkUrl?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -29,26 +33,21 @@ export const KarimAvatar: React.FC<KarimAvatarProps> = ({
     xl: 'w-5 h-5 ring-3',
   }[size];
 
+  // A user-uploaded artwork can still override the default locally,
+  // but the repository artwork is always the default source of truth.
+  const artworkUrl = customArtworkUrl || KARIM_ARTWORK;
+
   return (
     <div className={`relative inline-block flex-shrink-0 ${className}`}>
       <div
         className={`${sizeClasses} rounded-full overflow-hidden border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 flex items-center justify-center`}
       >
-        {customArtworkUrl ? (
-          <img
-            src={customArtworkUrl}
-            alt="Karim"
-            className="w-full h-full object-cover object-center"
-            draggable={false}
-          />
-        ) : (
-          <div
-            aria-label="Artwork Karim belum diatur"
-            className="w-full h-full flex items-center justify-center text-slate-400 dark:text-zinc-500 font-semibold select-none"
-          >
-            K
-          </div>
-        )}
+        <img
+          src={artworkUrl}
+          alt="Karim"
+          className="w-full h-full object-cover object-center"
+          draggable={false}
+        />
       </div>
 
       {showStatusDot && (
