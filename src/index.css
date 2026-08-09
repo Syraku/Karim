@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Clean messaging chat wallpaper background */
+.bg-chat-wallpaper {
+  background-color: #f0f2f5;
+  background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}
+
+.dark .bg-chat-wallpaper {
+  background-color: #0f172a;
+  background-image: radial-gradient(#334155 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+}
+

@@ -1,0 +1,6 @@
+{
+  "name": "KARIM",
+  "description": "Interactive AI Romance - Obrolan interaktif dengan Karim, teman SMA tsundere yang perlahan menjadi pasangan romantis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
