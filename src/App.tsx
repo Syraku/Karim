@@ -11,6 +11,9 @@ import { loadGameState, saveGameState, resetGameState } from './utils/storage';
 import { soundEngine } from './utils/audio';
 import { RELATIONSHIP_STAGES } from './data/karimData';
 
+const isRasterArtwork = (url?: string): url is string =>
+  !!url && /^(data:image\/(png|jpeg|jpg|webp);base64,|https?:\/\/)/i.test(url);
+
 export default function App() {
   const initialData = loadGameState();
 
@@ -19,27 +22,26 @@ export default function App() {
   const [relationship, setRelationship] = useState<RelationshipState>(initialData.relationship);
   const [currentEvent, setCurrentEvent] = useState<SchoolEvent>(initialData.currentEvent);
   const [playerProfile, setPlayerProfile] = useState<PlayerProfile>(initialData.playerProfile);
-  const [karimArtworkUrl, setKarimArtworkUrl] = useState<string | undefined>(initialData.karimArtworkUrl);
+  // Reject legacy/generated SVG avatar data saved by older versions.
+  const [karimArtworkUrl, setKarimArtworkUrl] = useState<string | undefined>(
+    isRasterArtwork(initialData.karimArtworkUrl) ? initialData.karimArtworkUrl : undefined,
+  );
   const [audioEnabled, setAudioEnabled] = useState<boolean>(initialData.audioEnabled);
   const [autoInitiateEnabled, setAutoInitiateEnabled] = useState<boolean>(initialData.autoInitiateEnabled);
 
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  // Modals state
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [isRelationshipOpen, setIsRelationshipOpen] = useState<boolean>(false);
   const [isEventsOpen, setIsEventsOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
 
-  // Auto save ref sync
   const lastInteractionTimeRef = useRef<number>(Date.now());
 
-  // Update sound engine preference
   useEffect(() => {
     soundEngine.enabled = audioEnabled;
   }, [audioEnabled]);
 
-  // Persist state updates
   useEffect(() => {
     saveGameState({
       messages,
@@ -53,17 +55,18 @@ export default function App() {
     });
   }, [messages, memories, relationship, currentEvent, playerProfile, karimArtworkUrl, audioEnabled, autoInitiateEnabled]);
 
-  // Helper for humanlike sequential message delivery with typing delays
+  // Human-like delivery: each bubble gets its own variable typing time.
   const deliverKarimMessages = async (msgs: string[]) => {
     for (let i = 0; i < msgs.length; i++) {
+      const text = String(msgs[i] || '').trim();
+      if (!text) continue;
+
       setIsTyping(true);
 
-      const text = msgs[i];
       const chars = text.length;
-      // Calculate realistic delay: 1500ms min up to 5500ms for long text, with random variation
-      const baseDelay = Math.min(Math.max(1200 + chars * 35, 1500), 5500);
-      const randomJitter = Math.floor(Math.random() * 600) - 300;
-      const delay = Math.max(baseDelay + randomJitter, 1200);
+      const baseDelay = Math.min(Math.max(1100 + chars * 32, 1400), 4200);
+      const randomJitter = Math.floor(Math.random() * 700) - 350;
+      const delay = Math.max(baseDelay + randomJitter, 1100);
 
       await new Promise((resolve) => setTimeout(resolve, delay));
       setIsTyping(false);
@@ -78,14 +81,15 @@ export default function App() {
       setMessages((prev) => [...prev, karimMsg]);
       soundEngine.playMessageReceive();
 
-      // Pause briefly between consecutive bubbles if there are more coming
       if (i < msgs.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const betweenDelay = 300 + Math.floor(Math.random() * 600);
+        await new Promise((resolve) => setTimeout(resolve, betweenDelay));
       }
     }
+
+    setIsTyping(false);
   };
 
-  // Handle Player sending message
   const handleSendMessage = async (text: string) => {
     lastInteractionTimeRef.current = Date.now();
 
@@ -116,20 +120,22 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
-      const responseMessages: string[] = data.messages || ['Woi, sinyal agak lemot nih...'];
+      if (!res.ok) throw new Error(`Chat API returned ${res.status}`);
 
-      // Deliver messages sequentially with typing indicators
+      const data = await res.json();
+      const responseMessages: string[] = Array.isArray(data.messages)
+        ? data.messages.filter((message: unknown): message is string => typeof message === 'string' && message.trim().length > 0)
+        : ['Woi, sinyal agak lemot nih...'];
+
       await deliverKarimMessages(responseMessages);
 
-      // Handle new extracted memories
       if (Array.isArray(data.newMemories) && data.newMemories.length > 0) {
         const formattedNew: MemoryItem[] = data.newMemories.map((m: { category: string; content: string; importance?: number }, i: number) => ({
           id: `mem-${Date.now()}-${i}`,
           category: (m.category as MemoryItem['category']) || 'fact',
           content: m.content,
           createdAt: new Date().toISOString(),
-          importance: m.importance || 3,
+          importance: m.importance ?? 3,
         }));
 
         setMemories((prev) => {
@@ -139,42 +145,30 @@ export default function App() {
         });
       }
 
-      // Handle Relationship Progress
+      // The game engine owns relationship progression. The AI may suggest deltas,
+      // but it can never directly choose a relationship stage or confession.
       if (data.updatedRelationship) {
-        const { affectionDelta, trustDelta, closenessDelta, statusText, newStage } = data.updatedRelationship;
+        const { affectionDelta, trustDelta, closenessDelta, statusText } = data.updatedRelationship;
 
         setRelationship((prev) => {
-          const newCloseness = Math.min(Math.max(prev.closeness + (closenessDelta || 1), 0), 100);
-          const newAffection = Math.min(Math.max(prev.affection + (affectionDelta || 1), 0), 100);
-          const newTrust = Math.min(Math.max(prev.trust + (trustDelta || 1), 0), 100);
+          const affectionChange = Number.isFinite(Number(affectionDelta)) ? Number(affectionDelta) : 0;
+          const trustChange = Number.isFinite(Number(trustDelta)) ? Number(trustDelta) : 0;
+          const closenessChange = Number.isFinite(Number(closenessDelta)) ? Number(closenessDelta) : 0;
 
-          let calculatedStage: RelationshipStageId = prev.stage;
-          if (newStage && newStage > prev.stage && newStage <= 9) {
-            calculatedStage = newStage as RelationshipStageId;
-          } else {
-            for (const stageDef of RELATIONSHIP_STAGES) {
-              if (newCloseness >= stageDef.minCloseness) {
-                calculatedStage = stageDef.id;
-              }
-            }
+          const newCloseness = Math.min(Math.max(prev.closeness + closenessChange, 0), 100);
+          const newAffection = Math.min(Math.max(prev.affection + affectionChange, 0), 100);
+          const newTrust = Math.min(Math.max(prev.trust + trustChange, 0), 100);
+
+          // Stage is deterministic from closeness. AI output cannot force a stage.
+          let calculatedStage: RelationshipStageId = RELATIONSHIP_STAGES[0].id;
+          for (const stageDef of RELATIONSHIP_STAGES) {
+            if (newCloseness >= stageDef.minCloseness) calculatedStage = stageDef.id;
           }
 
           const stageInfo = RELATIONSHIP_STAGES.find((s) => s.id === calculatedStage) || RELATIONSHIP_STAGES[0];
 
           if (calculatedStage > prev.stage) {
             soundEngine.playRelationshipUp();
-            setTimeout(() => {
-              setMessages((m) => [
-                ...m,
-                {
-                  id: `sys-milestone-${Date.now()}`,
-                  sender: 'system',
-                  text: `💕 Level Hubungan Naik! Stage ${calculatedStage}: ${stageInfo.name}`,
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  systemType: 'relationship',
-                },
-              ]);
-            }, 800);
           }
 
           return {
@@ -184,7 +178,7 @@ export default function App() {
             trust: newTrust,
             stage: calculatedStage,
             stageName: stageInfo.name,
-            statusText: statusText || prev.statusText,
+            statusText: typeof statusText === 'string' && statusText.trim() ? statusText : prev.statusText,
           };
         });
       }
@@ -203,20 +197,9 @@ export default function App() {
     }
   };
 
-  // Handle Changing Event / Time Travel
   const handleSelectEvent = useCallback(async (event: SchoolEvent) => {
     setCurrentEvent(event);
-
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const systemBanner: ChatMessage = {
-      id: `sys-evt-${Date.now()}`,
-      sender: 'system',
-      text: `📍 Suasana Berubah: ${event.title} (${event.location})`,
-      timestamp: timeStr,
-      systemType: 'event',
-    };
-
-    setMessages((prev) => [...prev, systemBanner]);
+    setIsEventsOpen(false);
     setIsTyping(true);
 
     try {
@@ -230,32 +213,20 @@ export default function App() {
         }),
       });
 
-      const data = await res.json();
-      const initMsgs: string[] = data.messages || [event.starterPrompt];
+      if (!res.ok) throw new Error(`Initiate API returned ${res.status}`);
 
-      setTimeout(() => {
-        setIsTyping(false);
-        initMsgs.forEach((msgText, idx) => {
-          setTimeout(() => {
-            const karimMsg: ChatMessage = {
-              id: `msg-initiate-${Date.now()}-${idx}`,
-              sender: 'karim',
-              text: msgText,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              status: 'read',
-            };
-            setMessages((prev) => [...prev, karimMsg]);
-            soundEngine.playMessageReceive();
-          }, idx * 500);
-        });
-      }, 1200);
+      const data = await res.json();
+      const initMsgs: string[] = Array.isArray(data.messages)
+        ? data.messages.filter((message: unknown): message is string => typeof message === 'string' && message.trim().length > 0)
+        : [event.starterPrompt];
+
+      await deliverKarimMessages(initMsgs);
     } catch (err) {
       console.error('Failed to fetch initiate message:', err);
       setIsTyping(false);
     }
   }, [playerProfile, relationship]);
 
-  // Handle Resetting Game State
   const handleResetGame = () => {
     const defaultData = resetGameState();
     setMessages(defaultData.messages);
@@ -270,7 +241,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-slate-100 dark:bg-zinc-950 font-sans antialiased text-slate-900 dark:text-zinc-100 overflow-hidden select-none">
-      {/* Top Navigation & Status Bar */}
       <ChatHeader
         karimArtworkUrl={karimArtworkUrl}
         isTyping={isTyping}
@@ -284,7 +254,6 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {/* Main Chat Screen Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto flex flex-col justify-between overflow-hidden bg-white dark:bg-zinc-900 border-x border-slate-200 dark:border-zinc-800 shadow-sm">
         <MessageList
           messages={messages}
@@ -301,12 +270,11 @@ export default function App() {
         />
       </main>
 
-      {/* Modals */}
       <KarimProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
         karimArtworkUrl={karimArtworkUrl}
-        onUpdateArtwork={(url) => setKarimArtworkUrl(url)}
+        onUpdateArtwork={(url) => setKarimArtworkUrl(isRasterArtwork(url) ? url : undefined)}
         memories={memories}
         relationship={relationship}
       />
