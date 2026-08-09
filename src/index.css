@@ -38,3 +38,34 @@ button:active { transform: scale(.96); }
 *::-webkit-scrollbar { width: 7px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: #c9aa78; border-radius: 20px; }
+
+/* Keep every modal on the same handmade/paper palette. */
+.bg-white { background-color: #fffaf0 !important; }
+.bg-slate-50 { background-color: #fff5df !important; }
+.bg-slate-100 { background-color: #fff1d5 !important; }
+.bg-slate-200 { background-color: #ead7b6 !important; }
+.border-slate-200, .border-slate-200\/80 { border-color: #ead7b6 !important; }
+.border-slate-300 { border-color: #dfc79f !important; }
+.text-slate-900, .text-slate-800 { color: #4b3b42 !important; }
+.text-slate-700, .text-slate-600 { color: #6e5c59 !important; }
+.text-slate-500, .text-slate-400 { color: #a1846c !important; }
+.bg-indigo-600 { background-color: #8d7288 !important; }
+.hover\:bg-indigo-700:hover { background-color: #795f75 !important; }
+.text-indigo-600, .text-indigo-500 { color: #8d7288 !important; }
+.border-indigo-600, .border-indigo-400 { border-color: #b79ab2 !important; }
+.bg-indigo-50, .bg-indigo-50\/60 { background-color: #f3e8f0 !important; }
+.border-indigo-100 { border-color: #decbd9 !important; }
+.ring-indigo-500\/20 { --tw-ring-color: rgba(141,114,136,.2) !important; }
+.bg-purple-50\/60 { background-color: #f1e9e4 !important; }
+.text-purple-600, .text-purple-500 { color: #9a7667 !important; }
+.bg-rose-50 { background-color: #fae1e3 !important; }
+.text-rose-700, .text-rose-600, .text-rose-500 { color: #a75f70 !important; }
+.bg-rose-600, .bg-rose-500 { background-color: #bb687c !important; }
+.border-rose-200, .border-rose-300 { border-color: #e8bfc7 !important; }
+.bg-emerald-500 { background-color: #91a56b !important; }
+.text-emerald-600 { color: #6f824f !important; }
+.bg-amber-500, .text-amber-500 { color: #a1846c !important; }
+
+/* Dialog surfaces and inputs */
+input.bg-slate-100 { background-color: #fffaf0 !important; }
+.shadow-xl { box-shadow: 0 12px 0 rgba(76,65,69,.10), 0 20px 45px rgba(76,65,69,.12) !important; }
