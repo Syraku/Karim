@@ -1,10 +1,11 @@
+import 'dotenv/config';
 import { GoogleGenAI, Type } from '@google/genai';
 import { ChatMessage, MemoryCategory, MemoryItem, PlayerProfile, RelationshipState, SchoolEvent } from '../types';
 
 export function getGeminiClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is missing.');
+    throw new Error('GEMINI_API_KEY environment variable is missing. Set it in the server environment.');
   }
   return new GoogleGenAI({
     apiKey,
@@ -167,16 +168,7 @@ Balas sebagai Karim secara natural.
     };
   } catch (err) {
     console.error('Error generating Karim response via Gemini:', err);
-    return {
-      messages: ['Eh, sinyal agak ngadat nih...', 'Tadi kamu bilang apa? Coba ketik lagi dong.'],
-      newMemories: [],
-      updatedRelationship: {
-        affectionDelta: 0,
-        trustDelta: 0,
-        closenessDelta: 0,
-        statusText: 'Menunggu koneksi lancar kembali',
-      },
-    };
+    throw err;
   }
 }
 
@@ -226,6 +218,7 @@ Kembalikan JSON: { "messages": ["...", "..."] }
     }
   } catch (err) {
     console.error('Failed to generate initiate message:', err);
+    throw err;
   }
 
   return [event.starterPrompt];
