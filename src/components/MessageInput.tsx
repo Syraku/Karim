@@ -1,5 +1,5 @@
 import React, { useState, KeyboardEvent } from 'react';
-import { Send, Sparkles, Clock, MessageSquarePlus } from 'lucide-react';
+import { Send, Clock, MessageSquarePlus } from 'lucide-react';
 
 interface MessageInputProps {
   onSendMessage: (text: string) => void;
@@ -39,62 +39,51 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     }
   };
 
-  const handleSelectSuggestion = (suggestion: string) => {
-    setText(suggestion);
-    setShowSuggestions(false);
-  };
-
   return (
-    <div className="sticky bottom-0 z-10 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-800 p-2.5 sm:p-3 shadow-2xs">
-      <div className="max-w-5xl mx-auto space-y-2">
-        {/* Quick Suggestion Chips */}
+    <div className="shrink-0 bg-[#fffdf9] dark:bg-[#171719] border-t border-[#e8e1d8] dark:border-zinc-800 px-3 sm:px-5 py-3">
+      <div className="max-w-2xl mx-auto">
         {showSuggestions && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 whitespace-nowrap px-1 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-indigo-500" />
-              Topik:
-            </span>
-            {QUICK_SUGGESTIONS.map((s, idx) => (
+          <div className="flex gap-1.5 overflow-x-auto pb-2.5 scrollbar-none">
+            {QUICK_SUGGESTIONS.map((suggestion) => (
               <button
-                key={idx}
+                key={suggestion}
                 type="button"
-                onClick={() => handleSelectSuggestion(s)}
-                className="text-xs bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 px-3 py-1 rounded-full border border-slate-200 dark:border-zinc-700 transition-colors whitespace-nowrap"
+                onClick={() => {
+                  setText(suggestion);
+                  setShowSuggestions(false);
+                }}
+                className="shrink-0 text-[12px] text-[#655d56] dark:text-zinc-300 bg-[#f4eee8] dark:bg-zinc-800 hover:bg-[#ece4dc] dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg transition-colors"
               >
-                {s}
+                {suggestion}
               </button>
             ))}
           </div>
         )}
 
-        {/* Action Row & Input Bar */}
-        <div className="flex items-center gap-2">
-          {/* Quick Topics Toggle button */}
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setShowSuggestions(!showSuggestions)}
-            className={`p-2 rounded-full transition-colors ${
+            className={`w-9 h-9 flex items-center justify-center rounded-lg transition-colors ${
               showSuggestions
-                ? 'bg-indigo-100 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400'
-                : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                ? 'bg-[#eee7df] dark:bg-zinc-800 text-[#6f6259] dark:text-zinc-200'
+                : 'text-[#8d847c] dark:text-zinc-500 hover:bg-[#f5efe9] dark:hover:bg-zinc-800'
             }`}
-            title="Ide Topik Obrolan"
+            title="Ide obrolan"
           >
-            <MessageSquarePlus className="w-5 h-5" />
+            <MessageSquarePlus className="w-[17px] h-[17px]" />
           </button>
 
-          {/* Time & Event Jump button */}
           <button
             type="button"
             onClick={onOpenEvents}
-            className="p-2 text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors flex items-center gap-1 text-xs font-medium"
-            title="Ganti Waktu / Suasana Sekolah"
+            className="hidden sm:flex h-9 items-center gap-1.5 px-2 text-[11px] text-[#8d847c] dark:text-zinc-500 hover:bg-[#f5efe9] dark:hover:bg-zinc-800 rounded-lg transition-colors"
+            title="Ganti suasana"
           >
-            <Clock className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
-            <span className="hidden sm:inline">{currentPeriodName}</span>
+            <Clock className="w-4 h-4" />
+            <span>{currentPeriodName}</span>
           </button>
 
-          {/* Main Free Text Input */}
           <div className="flex-1 relative">
             <input
               type="text"
@@ -103,19 +92,18 @@ export const MessageInput: React.FC<MessageInputProps> = ({
               onKeyDown={handleKeyDown}
               disabled={disabled}
               placeholder={disabled ? 'Karim sedang mengetik...' : 'Tulis pesan...'}
-              className="w-full bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 text-sm px-4 py-2 rounded-full border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-colors disabled:opacity-60"
+              className="w-full h-9 bg-[#f4f0eb] dark:bg-[#222225] text-[#2c2926] dark:text-zinc-100 placeholder-[#aaa199] dark:placeholder-zinc-600 text-[14px] px-3.5 rounded-lg border border-transparent focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-[#d8cec3] dark:focus:border-zinc-700 transition-colors disabled:opacity-60"
             />
           </div>
 
-          {/* Send Button */}
           <button
             type="button"
             onClick={handleSend}
             disabled={!text.trim() || disabled}
-            className="p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 active:scale-95"
-            title="Kirim Pesan"
+            className="w-9 h-9 flex items-center justify-center bg-[#756579] hover:bg-[#685a6d] text-white rounded-lg transition-colors disabled:opacity-25 disabled:cursor-not-allowed active:scale-95"
+            title="Kirim pesan"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-[15px] h-[15px]" />
           </button>
         </div>
       </div>
