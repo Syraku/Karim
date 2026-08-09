@@ -1,8 +1,8 @@
 import React from 'react';
 
 // Canonical Karim artwork committed to the repository.
-// Do not replace this with generated artwork or a generic avatar.
-const KARIM_ARTWORK = new URL('../../assets/.aistudio/Karim.jpg', import.meta.url).href;
+// This is the only default character artwork used by the app.
+export const KARIM_ARTWORK = new URL('../../assets/.aistudio/Karim.jpg', import.meta.url).href;
 
 interface KarimAvatarProps {
   customArtworkUrl?: string;
@@ -33,9 +33,13 @@ export const KarimAvatar: React.FC<KarimAvatarProps> = ({
     xl: 'w-5 h-5 ring-3',
   }[size];
 
-  // A user-uploaded artwork can still override the default locally,
-  // but the repository artwork is always the default source of truth.
-  const artworkUrl = customArtworkUrl || KARIM_ARTWORK;
+  // Only a real user-uploaded raster image may override the canonical artwork.
+  // SVG/data-URL generated avatars are intentionally rejected.
+  const isValidCustomArtwork =
+    !!customArtworkUrl &&
+    /^(data:image\/(png|jpeg|jpg|webp);base64,|https?:\/\/)/i.test(customArtworkUrl);
+
+  const artworkUrl = isValidCustomArtwork ? customArtworkUrl! : KARIM_ARTWORK;
 
   return (
     <div className={`relative inline-block flex-shrink-0 ${className}`}>
@@ -47,6 +51,10 @@ export const KarimAvatar: React.FC<KarimAvatarProps> = ({
           alt="Karim"
           className="w-full h-full object-cover object-center"
           draggable={false}
+          onError={(event) => {
+            const img = event.currentTarget;
+            if (img.src !== KARIM_ARTWORK) img.src = KARIM_ARTWORK;
+          }}
         />
       </div>
 
