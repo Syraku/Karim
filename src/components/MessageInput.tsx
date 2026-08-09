@@ -12,9 +12,9 @@ const QUICK_SUGGESTIONS = [
   'Udah makan belum?',
   'Hari ini pelajaran apa aja sih?',
   'Tadi PR matematika kamu udah selesai?',
-  'Ajak makan bakso di kantin yuk!',
-  'Bukan berarti aku kangen ya wkwk',
-  'Kamu kok perhatian banget sih hari ini?',
+  'Ayo beli jajan di kantin yuk!',
+  'Kamu tadi masuk jam berapa?',
+  'Besok ada tugas apa?',
 ];
 
 export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled, onOpenEvents, currentPeriodName }) => {
@@ -52,7 +52,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
             <MessageSquarePlus size={18} />
           </button>
 
-          <button type="button" onClick={onOpenEvents} className="hidden h-10 items-center gap-1.5 rounded-xl border-2 border-[#ead7b6] bg-[#fffaf0] px-3 text-[11px] font-bold text-[#8d7769] transition hover:bg-white sm:flex" title="Ganti suasana">
+          <button type="button" onClick={onOpenEvents} className="hidden h-10 items-center gap-1.5 rounded-xl border-2 border-[#ead7b6] bg-[#fffaf0] px-3 text-[11px] font-bold text-[#8d7769] transition hover:bg-white sm:flex" title="Info sekolah">
             <Clock size={16} />
             <span>{currentPeriodName}</span>
           </button>
