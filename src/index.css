@@ -7,14 +7,17 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { width: 100%; height: 100%; margin: 0; }
-body { overflow: hidden; background: #f6e7c7; }
+html { background: #f6e7c7; }
+body { overflow: hidden; background: #f6e7c7; overscroll-behavior: none; }
 button, input, textarea { font-family: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:active { transform: scale(.96); }
+input, textarea { font-size: 16px; }
 
 .bg-chat-wallpaper {
   background-color: #f6e7c7;
@@ -69,3 +72,20 @@ button:active { transform: scale(.96); }
 /* Dialog surfaces and inputs */
 input.bg-slate-100 { background-color: #fffaf0 !important; }
 .shadow-xl { box-shadow: 0 12px 0 rgba(76,65,69,.10), 0 20px 45px rgba(76,65,69,.12) !important; }
+
+/* Mobile / phone polish */
+@media (max-width: 640px) {
+  html, body, #root { min-height: 100dvh; height: 100dvh; }
+  body { width: 100%; }
+  .karim-splash { min-height: 100dvh; padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom); }
+  .karim-splash > div { width: min(360px, calc(100vw - 24px)); height: min(76dvh, 620px); max-height: 620px; border-width: 6px; border-radius: 30px; }
+  .karim-splash img { height: 112px; width: 112px; }
+  .karim-splash h1 { font-size: 2.75rem; }
+  main { min-height: 0; }
+  button { min-height: 40px; }
+  textarea, input { max-height: 120px; }
+}
+
+@supports (padding: max(0px)) {
+  .karim-mobile-safe-bottom { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+}
