@@ -11,6 +11,8 @@ import { loadGameState, saveGameState, resetGameState } from './utils/storage';
 import { soundEngine } from './utils/audio';
 import { RELATIONSHIP_STAGES } from './data/karimData';
 
+const KARIM_WORKER_URL = 'https://karim-worker.karim-siraku.workers.dev/chat';
+
 const isRasterArtwork = (url?: string): url is string =>
   !!url && /^(data:image\/(png|jpeg|jpg|webp);base64,|https?:\/\/)/i.test(url);
 
@@ -31,12 +33,20 @@ export default function App() {
   const [isRelationshipOpen, setIsRelationshipOpen] = useState<boolean>(false);
   const [isEventsOpen, setIsEventsOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashLeaving, setSplashLeaving] = useState(false);
   const lastInteractionTimeRef = useRef<number>(Date.now());
 
   useEffect(() => { soundEngine.enabled = audioEnabled; }, [audioEnabled]);
   useEffect(() => {
     saveGameState({ messages, memories, relationship, currentEvent, playerProfile, karimArtworkUrl, audioEnabled, autoInitiateEnabled });
   }, [messages, memories, relationship, currentEvent, playerProfile, karimArtworkUrl, audioEnabled, autoInitiateEnabled]);
+
+  useEffect(() => {
+    const leaveTimer = window.setTimeout(() => setSplashLeaving(true), 1250);
+    const hideTimer = window.setTimeout(() => setShowSplash(false), 1850);
+    return () => { window.clearTimeout(leaveTimer); window.clearTimeout(hideTimer); };
+  }, []);
 
   const deliverKarimMessages = async (msgs: string[]) => {
     for (let i = 0; i < msgs.length; i++) {
@@ -71,7 +81,7 @@ export default function App() {
     setIsTyping(true);
 
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(KARIM_WORKER_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userMessage: text, playerProfile, relationship, memories, recentMessages: [...messages, playerMsg], currentEvent }),
       });
@@ -151,12 +161,33 @@ export default function App() {
     setAudioEnabled(true); setAutoInitiateEnabled(true);
   };
 
+  if (showSplash) {
+    return (
+      <div className={`karim-splash ${splashLeaving ? 'is-leaving' : ''} fixed inset-0 z-50 flex items-center justify-center bg-[#f6e7c7]`}>
+        <div className="relative flex h-[78vh] max-h-[760px] w-[min(390px,88vw)] flex-col items-center justify-center overflow-hidden rounded-[34px] border-[7px] border-[#4c4145] bg-[#fff5df] shadow-[0_16px_0_rgba(76,65,69,.18)]">
+          <div className="absolute inset-3 rounded-[27px] border-2 border-[#ead7b6]" />
+          <div className="relative z-10 flex flex-col items-center gap-5 px-8 text-center">
+            <div className="rounded-full border-4 border-[#dfc79f] bg-[#fffaf0] p-2 shadow-[0_5px_0_rgba(101,76,51,.12)]">
+              <img src="/assets/.aistudio/Karim.jpg" alt="Karim" className="h-32 w-32 rounded-full object-cover sm:h-36 sm:w-36" />
+            </div>
+            <div>
+              <p className="mb-1 text-[12px] font-extrabold uppercase tracking-[.3em] text-[#a1846c]">a message from</p>
+              <h1 className="text-5xl font-black tracking-tight text-[#4b3b42]">KARIM</h1>
+              <p className="mt-2 text-sm font-bold text-[#9a806c]">SMA Garuda · online</p>
+            </div>
+          </div>
+          <div className="absolute bottom-7 text-[11px] font-bold text-[#b39a82]">tap into the conversation</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-screen w-full bg-[#f1ede7] dark:bg-[#101011] font-sans antialiased text-[#292725] dark:text-zinc-100 overflow-hidden select-none">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#f6e7c7] font-sans antialiased text-[#493f43] select-none">
       <ChatHeader karimArtworkUrl={karimArtworkUrl} isTyping={isTyping} relationship={relationship} currentEvent={currentEvent}
         audioEnabled={audioEnabled} onToggleAudio={() => setAudioEnabled(!audioEnabled)} onOpenProfile={() => setIsProfileOpen(true)}
         onOpenRelationship={() => setIsRelationshipOpen(true)} onOpenEvents={() => setIsEventsOpen(true)} onOpenSettings={() => setIsSettingsOpen(true)} />
-      <main className="flex-1 min-h-0 w-full flex flex-col overflow-hidden bg-[#fbf8f3] dark:bg-[#141415]">
+      <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
         <MessageList messages={messages} isTyping={isTyping} karimArtworkUrl={karimArtworkUrl} playerName={playerProfile.name} />
         <MessageInput onSendMessage={handleSendMessage} disabled={isTyping} onOpenEvents={() => setIsEventsOpen(true)} currentPeriodName={currentEvent.period} />
       </main>
