@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Heart, Settings, User, Volume2, VolumeX } from 'lucide-react';
+import { Calendar, Heart, Settings, Volume2, VolumeX } from 'lucide-react';
 import { RelationshipState, SchoolEvent } from '../types';
 import { KarimAvatar } from './KarimAvatar';
 
@@ -29,60 +29,36 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onOpenSettings,
 }) => {
   return (
-    <header className="shrink-0 bg-[#fffdf9]/95 dark:bg-[#171719]/95 backdrop-blur-sm border-b border-[#e8e1d8] dark:border-zinc-800 px-4 py-3">
-      <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
-        <button
-          onClick={onOpenProfile}
-          className="flex items-center gap-3 min-w-0 text-left rounded-lg -ml-1 px-1 py-1 hover:bg-[#f6f1eb] dark:hover:bg-zinc-800/70 transition-colors"
-        >
+    <header className="relative z-20 shrink-0 border-b-2 border-[#dfc79f] bg-[#fff5df] shadow-[0_3px_0_rgba(94,70,47,.08)]">
+      <div className="mx-auto flex h-[74px] max-w-3xl items-center gap-3 px-4">
+        <button onClick={onOpenProfile} className="relative shrink-0 rounded-full transition-transform hover:rotate-2" title="Profil Karim">
           <KarimAvatar customArtworkUrl={karimArtworkUrl} size="md" isOnline={true} />
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-[#252320] dark:text-zinc-100 truncate">Karim</h1>
-              <span className="hidden sm:inline text-[11px] text-[#9b938a] dark:text-zinc-500">{currentEvent.period}</span>
-            </div>
-            <div className="text-[12px] text-[#8f877f] dark:text-zinc-400 mt-0.5">
-              {isTyping ? 'sedang mengetik...' : 'online'}
-            </div>
-          </div>
         </button>
 
-        <div className="flex items-center gap-0.5 shrink-0">
-          <button
-            onClick={onOpenEvents}
-            className="hidden sm:flex items-center gap-1.5 h-9 px-2.5 text-[#817971] dark:text-zinc-400 hover:bg-[#f6f1eb] dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title="Suasana sekolah"
-          >
-            <Calendar className="w-[17px] h-[17px]" />
-            <span className="text-[12px]">{currentEvent.period}</span>
+        <div className="min-w-0 flex-1 text-left">
+          <div className="flex items-center gap-2">
+            <h1 className="truncate text-[23px] font-extrabold leading-none text-[#4b3b42]">Karim</h1>
+            <span className="rounded-full bg-[#e7f0c8] px-2 py-0.5 text-[11px] font-bold text-[#66734b]">
+              {isTyping ? 'ngetik...' : 'online'}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center gap-1.5 text-[12px] font-semibold text-[#9a806c]">
+            <span>{currentEvent.period}</span><span>·</span><span>SMA Garuda</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button onClick={onOpenEvents} className="hidden h-10 items-center justify-center rounded-xl px-2.5 text-[#806d60] transition hover:bg-[#f7e8ca] sm:flex" title="Suasana sekolah">
+            <Calendar size={18} />
           </button>
-          <button
-            onClick={onOpenRelationship}
-            className="w-9 h-9 flex items-center justify-center text-[#9b6f79] dark:text-rose-300 hover:bg-[#f8eeee] dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title="Hubungan"
-          >
-            <Heart className="w-[18px] h-[18px]" />
+          <button onClick={onOpenRelationship} className="flex h-10 w-10 items-center justify-center rounded-xl text-[#bb687c] transition hover:bg-[#fae1e3]" title="Hubungan">
+            <Heart size={18} fill="currentColor" />
           </button>
-          <button
-            onClick={onToggleAudio}
-            className="w-9 h-9 flex items-center justify-center text-[#817971] dark:text-zinc-400 hover:bg-[#f6f1eb] dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title={audioEnabled ? 'Matikan suara' : 'Aktifkan suara'}
-          >
-            {audioEnabled ? <Volume2 className="w-[17px] h-[17px]" /> : <VolumeX className="w-[17px] h-[17px]" />}
+          <button onClick={onToggleAudio} className="flex h-10 w-10 items-center justify-center rounded-xl text-[#806d60] transition hover:bg-[#f7e8ca]" title={audioEnabled ? 'Matikan suara' : 'Aktifkan suara'}>
+            {audioEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
           </button>
-          <button
-            onClick={onOpenProfile}
-            className="w-9 h-9 flex items-center justify-center text-[#817971] dark:text-zinc-400 hover:bg-[#f6f1eb] dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title="Profil Karim"
-          >
-            <User className="w-[17px] h-[17px]" />
-          </button>
-          <button
-            onClick={onOpenSettings}
-            className="w-9 h-9 flex items-center justify-center text-[#817971] dark:text-zinc-400 hover:bg-[#f6f1eb] dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title="Pengaturan"
-          >
-            <Settings className="w-[17px] h-[17px]" />
+          <button onClick={onOpenSettings} className="flex h-10 w-10 items-center justify-center rounded-xl text-[#806d60] transition hover:bg-[#f7e8ca]" title="Pengaturan">
+            <Settings size={18} />
           </button>
         </div>
       </div>
