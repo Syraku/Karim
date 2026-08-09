@@ -74,16 +74,30 @@ export default function App() {
     try {
       const requestBody = { userMessage: text, playerProfile, relationship, memories, recentMessages: [...messages, playerMsg], currentEvent };
       const request = () => fetch(KARIM_CHAT_API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) });
-      let res = await request();
-      if (!res.ok && (res.status === 502 || res.status === 503 || res.status === 504)) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        res = await request();
+      let res: Response | null = null;
+      let lastError: unknown = null;
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          res = await request();
+          if (res.ok) break;
+          if (![502, 503, 504].includes(res.status)) break;
+          lastError = new Error(`HTTP ${res.status}`);
+        } catch (error) {
+          lastError = error;
+        }
+        if (attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        }
       }
+
+      if (!res) throw lastError instanceof Error ? lastError : new Error('Request failed.');
       if (!res.ok) {
         let detail = `HTTP ${res.status}`;
         try { const errorBody = await res.json(); if (errorBody?.detail || errorBody?.error) detail = errorBody.detail || errorBody.error; } catch { /* ignore */ }
         throw new Error(detail);
       }
+
       const data = await res.json();
       const responseMessages: string[] = Array.isArray(data.messages) ? data.messages.filter((message: unknown): message is string => typeof message === 'string' && message.trim().length > 0) : [];
       if (!responseMessages.length) throw new Error('Server returned no messages.');
