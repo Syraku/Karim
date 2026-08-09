@@ -43,12 +43,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </span>
           </div>
           <div className="mt-1 flex items-center gap-1.5 text-[12px] font-semibold text-[#9a806c]">
-            <span>{currentEvent.period}</span><span>·</span><span>SMA Garuda</span>
+            <span>{currentEvent.period}</span><span>·</span><span>SMKN 2 Cilaku</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1">
-          <button onClick={onOpenEvents} className="hidden h-10 items-center justify-center rounded-xl px-2.5 text-[#806d60] transition hover:bg-[#f7e8ca] sm:flex" title="Suasana sekolah">
+          <button onClick={onOpenEvents} className="hidden h-10 items-center justify-center rounded-xl px-2.5 text-[#806d60] transition hover:bg-[#f7e8ca] sm:flex" title="Info sekolah">
             <Calendar size={18} />
           </button>
           <button onClick={onOpenRelationship} className="flex h-10 w-10 items-center justify-center rounded-xl text-[#bb687c] transition hover:bg-[#fae1e3]" title="Hubungan">
